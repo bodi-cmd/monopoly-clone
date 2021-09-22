@@ -1,0 +1,68 @@
+<script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.6.0.slim.js"
+  integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY="
+  crossorigin="anonymous"></script>
+
+
+<h1>Room with id: <%= id %> </h1>
+<input type="text" id="name">
+<button id="join">Join game!</button>
+<button id="start">Start Game!</button>
+<button id="dice">Roll Dice []</button>
+<br>
+<label for="">Players:</label>
+<ul>
+</ul>
+
+<script>
+  /*const socket = io();
+  socket.on("id",(id)=>{
+    console.log(id);
+  })*/
+  $( document ).ready(function() {
+    $("#dice").hide();
+    const socket = io();
+    socket.on('connect', function() {
+        
+      
+    
+    
+    $('#join').on('click',()=>{
+        if($('#name').val()){
+            data = {room_id: "<%= id %>", userId: socket.id, name: $('#name').val()};
+            socket.emit("join",data);
+        }
+    })
+
+    $('#start').on('click',()=>{
+        socket.emit("start");
+    })
+    $("#dice").on('click',()=>{
+        socket.emit("rollDice");
+    })
+
+    socket.on('rolled_dice',(data)=>{
+      console.log(data.user.name +" rolled "+data.rolled);
+    })
+
+    socket.on("gameData",(game)=>{
+      console.log(game);
+      if(game.status == 'in game' && socket.id == game.players[game.turn%game.players.length].id){
+        $("#dice").show();
+      }
+      else{
+        $("#dice").hide();
+      }
+    })
+    
+    socket.on('users',(users)=>{
+        $('ul').html('');
+        users.forEach(user => {
+            $('ul').append("<p>"+user.name+"</p>");
+        });
+    });
+    
+    });
+    });
+</script>
